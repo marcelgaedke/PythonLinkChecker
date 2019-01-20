@@ -17,6 +17,7 @@ class LinkChecker:
         self.links_invalid = 0
 
     def checkImages(self):
+        self.img_response_times = []
         print("Checking images...")
         img_list = self.soup('img')
         for img in img_list:
@@ -30,10 +31,12 @@ class LinkChecker:
             print(img_path + " --> " + str(img_request.status_code))
             if img_request.status_code == 200:
                 self.images_valid += 1
+                self.img_response_times.append(img_request.elapsed.total_seconds())
             else:
                 self.images_invalid+=1
 
     def checkLinks(self):
+        self.link_response_times = []
         print("\n\n\nChecking links...")
         link_list = self.soup('a')
         for link in link_list:
@@ -44,9 +47,10 @@ class LinkChecker:
             else:
                 link_path = self.query_page + link_href
             link_request = requests.get(link_path)
-            print(link_path + " --> " + str(link_request.elapsed.total_seconds()) + "sec. - " + str(link_request.status_code))
+            print(link_path + " --> " + str(link_request.status_code))
             if(link_request.status_code == 200):
                 self.links_valid +=1
+                self.link_response_times.append(link_request.elapsed.total_seconds())
             else:
                 self.links_invalid +=1
 
@@ -64,6 +68,8 @@ if __name__ == "__main__":
         print("\n\nSummary:")
         print("Number of images checked: "+ str(linkChecker.images_checked))
         print("Number of bad images: "+ str(linkChecker.images_invalid))
+        print("Average response time: %4.2f sec." %(sum(linkChecker.img_response_times)/len(linkChecker.img_response_times)))
         print("\nNumber of links checked: "+ str(linkChecker.links_checked))
         print("Number of bad links: " + str(linkChecker.links_invalid))
+        print("Average response time: %4.2f sec." %(sum(linkChecker.link_response_times)/len(linkChecker.link_response_times)))
         print("\n\n")
